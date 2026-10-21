@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepinfer-server"
+version = "0.1.0"
+description = "Chat Completions serving for DeepInfer with deepseek-recipe"
+requires-python = ">=3.12"
+dependencies = [
+  "deepseek-recipe==0.2.0",
+  "fastapi==0.128.0",
+  "uvicorn==0.40.0",
+  "huggingface-hub==0.36.2",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<9", "pytest-asyncio>=1,<2", "httpx>=0.28,<0.29", "openai>=2,<3", "ruff>=0.15,<0.16", "tokenizers==0.21.4"]
+
+[project.scripts]
+deepinfer-server = "deepinfer_server.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,51 @@
+backend_name: DeepInfer-server-custom
+# DeepSeek organization logo; DeepInfer has no separate logo in its repository.
+# GPUStack custom YAML import currently drops the icon field.
+icon: https://avatars.githubusercontent.com/u/148330874
+description: >-
+  OpenAI-compatible text chat completions for DeepSeek-V4.1-Flash,
+  powered by DeepInfer and deepseek-recipe. Requires a single Linux worker
+  with NVIDIA SM100 GPUs, sufficient GPU and host memory, and working RDMA.
+  Select all GPUs needed by the model on the same worker; EP equals the
+  selected GPU count, with DP=1 and CP derived from EP. Image inputs and
+  multi-worker deployments are not supported.
+version_configs:
+  latest:
+    image_name: quay.io/gpustack/deepinfer-server:latest
+    custom_framework: cuda
+default_version: latest
+# The shell sets the memory-lock and stack limits before replacing itself.
+default_entrypoint: >-
+  /bin/bash -c 'ulimit -l unlimited && ulimit -s 65536 && exec deepinfer-server "$@"' deepinfer-server
+default_run_command: >-
+  "{{model_path}}"
+  --host 0.0.0.0
+  --port {{port}}
+  --served-model-name "{{model_name}}"
+  --expert-parallel-size {{gpu_count}}
+  --data-parallel-size 1
+  --trust-remote-code
+default_backend_param:
+  - --max-model-len=32768
+  - --max-num-seqs=16
+  - --max-num-batched-tokens=32768
+  - --startup-timeout=3600
+default_env:
+  DEEPINFER_JIT_CACHE_DIR: /var/lib/gpustack/cache/deepinfer/jit
+  GPUSTACK_HOST_IPC: "true"
+  TOKENIZERS_PARALLELISM: "false"
+  # RDMA settings validated on the eight-B200 worker; adjust for other fabrics.
+  NCCL_IB_HCA: "=mlx5_0"
+  NCCL_IB_SL: "0"
+  EP_OVERRIDE_RDMA_SL: "0"
+health_check_path: /health
+parameter_format: space
+common_parameters:
+  - --max-model-len
+  - --max-num-seqs
+  - --max-num-batched-tokens
+  - --gpu-memory-utilization
+  - --data-parallel-size
+  - --context-parallel-size
+  - --startup-timeout
+  - --request-timeout
