@@ -34,7 +34,7 @@ docker run --rm --gpus all --device=/dev/infiniband --ipc=host \
   -p 8000:8000 \
   -v /path/to/DeepSeek-V4.1-Flash-1017:/models/DeepSeek-V4.1-Flash:ro \
   -v deepinfer-cache:/cache \
-  deepinfer-server:latest \
+  quay.io/gpustack/deepinfer-server \
   /models/DeepSeek-V4.1-Flash \
   --served-model-name deepseek-flash \
   --trust-remote-code \
